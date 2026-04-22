@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Find the repository root even if this script is called through a symlink.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+
+DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+DAFNY_ROOT="$(cd -P "$DIR/.." && pwd)"
+
+APPHOST="$DAFNY_ROOT/Binaries/net8.0/DafnyDriver"
+DLL="$DAFNY_ROOT/Binaries/net8.0/DafnyDriver.dll"
+
+if [[ -x "$APPHOST" ]]; then
+  exec "$APPHOST" "$@"
+fi
+
+DOTNET="$(command -v dotnet || true)"
+if [[ -z "$DOTNET" ]]; then
+  echo "Error: dotnet was not found in PATH."
+  echo "Build the local Dafny driver first, or install .NET."
+  exit 1
+fi
+
+if [[ ! -f "$DLL" ]]; then
+  echo "Error: local Dafny driver not found at $DLL."
+  echo "Build it with:"
+  echo "  dotnet test $DAFNY_ROOT/Source/DafnyDriver.Test/DafnyDriver.Test.csproj --filter AstCommandTest --disable-build-servers -maxcpucount:1"
+  exit 1
+fi
+
+exec "$DOTNET" "$DLL" "$@"
