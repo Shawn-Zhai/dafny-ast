@@ -51,7 +51,7 @@ jobs:
         git push origin ${{ inputs.tag_name }} -f
       working-directory: dafny
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{env.dotnet-version}}
     - name: C++ for ubuntu 20.04
@@ -67,7 +67,7 @@ jobs:
       with:
         java-version: 18
         distribution: corretto
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
     - run: npm install bignumber.js
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -86,7 +86,7 @@ jobs:
       run: dotnet pack --version-suffix ${{ inputs.name }} dafny/Source/Dafny.sln
 
     - name: Make NuGet package available as an artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: nuget-packages
         path: dafny/Binaries/*.nupkg
